@@ -9,6 +9,8 @@ import BranchManagement from "./pages/branches/BranchManagement";
 import ProductManagement from "./pages/products/ProductManagement";
 import PosTerminal from "./pages/pos/PosTerminal";
 import UserManagement from "./pages/users/UserManagement";
+import ReportsPage from "./pages/reports/ReportsPage";
+import SettingsPage from "./pages/settings/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,7 +27,8 @@ const App = () => (
           <Route path="/products" element={<ProductManagement />} />
           <Route path="/pos" element={<PosTerminal />} />
           <Route path="/users" element={<UserManagement />} />
-          {/* Additional routes will be added here */}
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
