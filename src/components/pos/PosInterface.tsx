@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Minus, Trash, ShoppingCart, CreditCard, Printer } from "lucide-react";
+import { Search, Plus, Minus, Trash, ShoppingCart, CreditCard, Printer, Package } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Product, ProductService } from "@/services/product.service";
@@ -34,13 +33,11 @@ interface Sale {
 }
 
 export function PosInterface() {
-  // States for the POS
   const [searchTerm, setSearchTerm] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  
-  // Offline storage for products
+
   const { 
     data: products, 
     updateData: updateProducts,
@@ -50,13 +47,11 @@ export function PosInterface() {
     key: 'products',
     initialData: [],
     syncFunction: async (data) => {
-      // In a real app, this would sync with a backend API
       console.log('Syncing products data...', data);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   });
 
-  // Offline storage for sales
   const { 
     data: sales, 
     updateData: updateSales,
@@ -66,13 +61,11 @@ export function PosInterface() {
     key: 'sales',
     initialData: [],
     syncFunction: async (data) => {
-      // In a real app, this would sync with a backend API
       console.log('Syncing sales data...', data);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   });
 
-  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -86,11 +79,9 @@ export function PosInterface() {
     fetchProducts();
   }, [updateProducts]);
 
-  // Extract unique categories from products
   const categories = products ? 
     Array.from(new Set(products.map(product => product.category))) : [];
 
-  // Filter products based on search term and selected category
   const filteredProducts = products?.filter(product => {
     const matchesSearch = 
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -102,13 +93,11 @@ export function PosInterface() {
     return matchesSearch && matchesCategory;
   });
 
-  // Add product to cart
   const addToCart = (product: Product) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.product.id === product.id);
       
       if (existingItem) {
-        // Increase quantity of existing item
         return prevCart.map(item => 
           item.product.id === product.id
             ? { 
@@ -119,7 +108,6 @@ export function PosInterface() {
             : item
         );
       } else {
-        // Add new item to cart
         return [
           ...prevCart,
           {
@@ -136,12 +124,11 @@ export function PosInterface() {
     toast.success(`${product.name} added to cart`);
   };
 
-  // Update cart item quantity
   const updateCartItemQuantity = (productId: string, change: number) => {
     setCart(prevCart => {
       return prevCart.map(item => {
         if (item.product.id === productId) {
-          const newQuantity = Math.max(1, item.quantity + change); // Ensure quantity is at least 1
+          const newQuantity = Math.max(1, item.quantity + change);
           return {
             ...item,
             quantity: newQuantity,
@@ -153,15 +140,13 @@ export function PosInterface() {
     });
   };
 
-  // Remove item from cart
   const removeFromCart = (productId: string) => {
     setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
   };
 
-  // Calculate cart totals
   const calculateTotals = () => {
     const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-    const tax = subtotal * 0.1; // Assuming 10% tax rate
+    const tax = subtotal * 0.1;
     const total = subtotal + tax;
     
     return {
@@ -171,7 +156,6 @@ export function PosInterface() {
     };
   };
 
-  // Process payment
   const handleProcessPayment = async (paymentMethod: string) => {
     if (cart.length === 0) {
       toast.error("Cart is empty");
@@ -181,10 +165,8 @@ export function PosInterface() {
     setIsProcessingPayment(true);
     
     try {
-      // Calculate totals
       const { subtotal, tax, total } = calculateTotals();
       
-      // Create new sale record
       const newSale: Sale = {
         id: `sale-${Date.now()}`,
         items: [...cart],
@@ -195,20 +177,16 @@ export function PosInterface() {
         createdAt: new Date(),
         paymentMethod,
         status: "completed",
-        branchId: "1", // Assume current branch
-        userId: "1" // Assume current user
+        branchId: "1",
+        userId: "1"
       };
       
-      // Save to offline storage
       updateSales(sales ? [...sales, newSale] : [newSale]);
       
-      // Clear cart
       setCart([]);
       
-      // Show success message
       toast.success(`Payment successful. Total: $${total.toFixed(2)}`);
       
-      // Simulate printing receipt
       setTimeout(() => {
         console.log("Printing receipt for sale:", newSale);
       }, 500);
@@ -225,7 +203,6 @@ export function PosInterface() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
-      {/* Products Section */}
       <div className="md:col-span-2 flex flex-col space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex-1 max-w-sm relative">
@@ -253,7 +230,6 @@ export function PosInterface() {
           </div>
         </div>
 
-        {/* Categories Tabs */}
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="bg-pos-neutral mb-2 overflow-auto">
             <TabsTrigger 
@@ -276,7 +252,6 @@ export function PosInterface() {
           </TabsList>
         </Tabs>
 
-        {/* Products Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pb-4">
           {filteredProducts && filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
@@ -315,7 +290,6 @@ export function PosInterface() {
         </div>
       </div>
 
-      {/* Cart Section */}
       <div className="pos-card flex flex-col h-full">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -334,7 +308,6 @@ export function PosInterface() {
           )}
         </div>
 
-        {/* Cart Items */}
         <div className="flex-1 overflow-y-auto">
           {cart.length > 0 ? (
             <div className="space-y-2">
@@ -390,7 +363,6 @@ export function PosInterface() {
           )}
         </div>
 
-        {/* Totals */}
         <div className="mt-4 pt-4 border-t">
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
@@ -407,7 +379,6 @@ export function PosInterface() {
             </div>
           </div>
           
-          {/* Payment Buttons */}
           <div className="grid grid-cols-2 gap-2 mt-4">
             <Button
               variant="outline"
